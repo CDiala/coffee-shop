@@ -34,7 +34,7 @@ export class AuthService {
   // invoked in app.component on load
   check_token_fragment() {
     // parse the fragment
-    const fragment = window.location.hash.substr(1).split('&')[0].split('=');
+    const fragment = window.location.hash.substring(1).split('&')[0].split('=');
     // check if the fragment includes the access token
     if ( fragment[0] === 'access_token' ) {
       // add the access token to the jwt
