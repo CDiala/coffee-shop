@@ -13,41 +13,26 @@ app = Flask(__name__)
 setup_db(app)
 CORS(app)
 
-'''
-@TODO uncomment the following line to initialize the datbase
-!! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
-!! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
-!! Running this funciton will add one
-'''
+
+# Uncomment the following line to initialize the database, and comment it afterwards
 # db_drop_and_create_all()
 
 # ROUTES
-'''
-@TODO implement endpoint
-    GET /drinks
-        it should be a public endpoint
-        it should contain only the drink.short() data representation
-    returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
-        or appropriate status code indicating reason for failure
-'''
+
+# Get drink endpoint
 @app.route('/drinks', methods=['GET'])
 def get_drinks():
     drinks = Drink.query.all()
 
-    print(drinks, len(drinks))
-
-    # if drinks is Empty:
+    # abort if drinks is empty
     if len(drinks) == 0:
         abort(404)
 
     drink_short_list = [drink.short() for drink in drinks]
 
     return jsonify({
-        'status code': 200, 
-        'status': {
-            "success": True,
-            'drinks': drink_short_list
-        }
+        "success": True,
+        'drinks': drink_short_list
     })
 
 
@@ -62,6 +47,7 @@ def get_drink_detail(jwt):
         "success": True,
         "drinks": drink_long
     })
+
 
 # Create new drink
 @app.route('/drinks', methods=['POST'])
@@ -82,6 +68,7 @@ def add_new_drink(jwt):
         'success': True,
         "drinks": drink.long()
     })
+
 
 # Update drink
 @app.route('/drinks/<id>', methods=['PATCH'])
@@ -108,14 +95,15 @@ def update_drink(jwt, id):
 
         drink.update()
 
-        # Get updated drink info
-        drink = Drink.query.get(id)
-        print(drink)
+        # Get updated drinks list
+        drinks = Drink.query.all()
+        drinks_short = [drink.short() for drink in drinks]
 
     return jsonify({
         "success": True,
-        "drinks": drink.long()
+        "drinks": drinks_short
     })
+
 
 # Delete drink
 @app.route('/drinks/<id>', methods=['DELETE'])
@@ -134,9 +122,8 @@ def delete_drink(jwt, id):
     })
 
 # Error Handling
-'''
-Example error handling for unprocessable entity
-'''
+
+# Example error handling for unprocessable entity
 @app.errorhandler(422)
 def unprocessable(error):
     return jsonify({
@@ -145,7 +132,7 @@ def unprocessable(error):
         "message": "unprocessable"
     }), 422
 
-@app.errorhandler()
+@app.errorhandler(404)
 def not_found():
     return jsonify({
         "success": False,
