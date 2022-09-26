@@ -7,7 +7,7 @@ from urllib.request import urlopen
 
 AUTH0_DOMAIN = 'marche-du-cafe.us.auth0.com'
 ALGORITHMS = ['RS256']
-API_AUDIENCE = 'https://cshop_api/'
+API_AUDIENCE = 'cshop_api'
 
 ## AuthError Exception
 '''
@@ -68,9 +68,6 @@ def check_permissions(permission, payload):
         }, 403)
 
     return True
-
-def check_permissions(permission, payload):
-    raise Exception('Not Implemented')
 
 
 # Verify and decode token and return the payload
