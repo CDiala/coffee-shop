@@ -1,3 +1,5 @@
+from crypt import methods
+from distutils.dep_util import newer
 import os
 from flask import Flask, request, jsonify, abort
 from sqlalchemy import exc
@@ -58,42 +60,69 @@ def get_drinks():
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks-detail', methods=['GET'])
-@requires_auth('get:drinks-details')
+@requires_auth('get:drinks-detail')
 def get_drink_detail(jwt):
     drinks = Drink.query.all()
 
     drink_long = [drink.long() for drink in drinks]
     return jsonify({
-        'status code': 200,
-        'results': {
-            "success": True,
-            "drinks": drink_long
-        }
+        "success": True,
+        "drinks": drink_long
     })
 
+# Create new drink
+@app.route('/drinks', methods=['POST'])
+@requires_auth('post:drinks')
+def add_new_drink(jwt):
 
-'''
-@TODO implement endpoint
-    POST /drinks
-        it should create a new row in the drinks table
-        it should require the 'post:drinks' permission
-        it should contain the drink.long() data representation
-    returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
-        or appropriate status code indicating reason for failure
-'''
+    body = request.get_json()
 
+    if body is None:
+        abort(404)
+    
+    new_title = body.get('title', None)
+    new_recipe = json.dumps(body.get('recipe', None))
+    drink = Drink(title = new_title, recipe = new_recipe)
+    drink.insert()
+    
+    return jsonify({
+        'success': True,
+        "drinks": drink.long()
+    })
 
-'''
-@TODO implement endpoint
-    PATCH /drinks/<id>
-        where <id> is the existing model id
-        it should respond with a 404 error if <id> is not found
-        it should update the corresponding row for <id>
-        it should require the 'patch:drinks' permission
-        it should contain the drink.long() data representation
-    returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
-        or appropriate status code indicating reason for failure
-'''
+# Update drink
+@app.route('/drinks/<id>', methods=['PATCH'])
+@requires_auth('patch:drinks')
+def update_drink(jwt, id):
+
+    drink = Drink.query.get(id)
+
+    if drink is None:
+        abort(404)
+
+    body = request.get_json()
+    new_title = body.get('title', None)
+    new_recipe = body.get('recipe', None)
+
+    if body is None:
+        abort(404)
+    else:
+        if new_title is None:
+            new_title = drink.title
+        
+        if new_recipe is not None:
+            drink.recipe = json.dumps(new_recipe)
+
+        drink.update()
+
+        # Get updated drink info
+        drink = Drink.query.get(id)
+        print(drink)
+
+    return jsonify({
+        "success": True,
+        "drinks": drink.long()
+    })
 
 
 '''
