@@ -66,7 +66,7 @@ def add_new_drink(jwt):
     
     return jsonify({
         'success': True,
-        "drinks": drink.long()
+        "drinks": [drink.long()]
     })
 
 
@@ -97,11 +97,11 @@ def update_drink(jwt, id):
 
         # Get updated drinks list
         drinks = Drink.query.all()
-        drinks_short = [drink.short() for drink in drinks]
+        drinks_long = [drink.long() for drink in drinks]
 
     return jsonify({
         "success": True,
-        "drinks": drinks_short
+        "drinks": drinks_long
     })
 
 
